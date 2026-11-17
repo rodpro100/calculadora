@@ -3,15 +3,16 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
-<title>Calculadora</title>
-<meta name="description" content="Calculadora: calculadora sencilla y gratuita para sumar, restar, multiplicar, dividir y calcular porcentajes. Herramienta educativa de matemáticas.">
+<title>Calculadora y juego de mates</title>
+<meta name="description" content="Juego educativo de matemáticas: calculadora y juego de motos con retos de cálculo mental (sumas, restas, tablas de multiplicar y divisiones) y preguntas de seguridad vial.">
+<meta name="keywords" content="juego educativo, matemáticas, cálculo mental, tablas de multiplicar, calculadora, primaria, ESO">
 <meta name="category" content="education">
-<meta name="application-name" content="Calculadora">
+<meta name="application-name" content="Calculadora y juego de mates">
 <meta name="apple-mobile-web-app-title" content="Calculadora">
 <meta name="theme-color" content="#000000">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" type="image/svg+xml" href="icon.svg">
-<script type="application/ld+json">{"@context":"https://schema.org","@type":"SoftwareApplication","name":"Calculadora","applicationCategory":"EducationalApplication","operatingSystem":"Web","description":"Calculadora sencilla para operaciones básicas y porcentajes.","inLanguage":"es","isAccessibleForFree":true,"offers":{"@type":"Offer","price":"0","priceCurrency":"EUR"}}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":["VideoGame","SoftwareApplication"],"name":"Calculadora y juego de mates","applicationCategory":"EducationalApplication","genre":"Juego educativo de matemáticas","educationalUse":"Práctica de cálculo mental","learningResourceType":"Juego educativo","teaches":["Suma","Resta","Multiplicación","División","Seguridad vial"],"audience":{"@type":"EducationalAudience","educationalRole":"student"},"operatingSystem":"Web","description":"Calculadora y juego de motos con retos de cálculo mental y preguntas de seguridad vial.","inLanguage":"es","isAccessibleForFree":true,"offers":{"@type":"Offer","price":"0","priceCurrency":"EUR"}}</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bungee&family=Rubik:wght@400;600;800&display=swap" rel="stylesheet">
@@ -3651,11 +3652,11 @@ function goMenu(){if(typeof paseCheck==='function'&&paseCheck())return;S.story=n
 function totalStars(){let t=0;for(const k in save.stars)t+=save.stars[k]||0;return t;}
 function updateCoins(){document.querySelectorAll('.coinN').forEach(e=>e.textContent=totalStars()+' / '+LEVELS.length*3);document.querySelectorAll('.moneyN').forEach(e=>e.textContent=save.coins);}
 // un nivel se abre al pasar el anterior y si tienes las estrellas que pide su mundo (lo ya jugado sigue abierto)
-function unlocked(i){if((save.stars[i]||0)>0||i===0)return true;if(!((save.stars[i-1]||0)>0))return false;return totalStars()>=levelGate(i);}
+function unlocked(i){if(save.allUnlocked)return true;if((save.stars[i]||0)>0||i===0)return true;if(!((save.stars[i-1]||0)>0))return false;return totalStars()>=levelGate(i);}
 function buildLevels(){
  const W=$('worlds');W.innerHTML='';const all=totalStars();
  let tot=0;for(const run of worldRuns()){const k=run.k,th=THEMES[k];const sec=document.createElement('div');sec.className='world';
-  const got=run.list.reduce((a,i)=>a+(save.stars[i]||0),0),max=run.list.length*3,lockW=all<run.gate&&!run.list.some(i=>(save.stars[i]||0)>0);
+  const got=run.list.reduce((a,i)=>a+(save.stars[i]||0),0),max=run.list.length*3,lockW=!save.allUnlocked&&all<run.gate&&!run.list.some(i=>(save.stars[i]||0)>0);
   sec.innerHTML=`<div class="wh"><h3>${worldName(run)}</h3><div class="wp"><i style="width:${Math.round(got/max*100)}%"></i></div>${lockW?`<span class="wl">🔒 Necesitas <span class="star">★</span> ${run.gate}</span>`:`<span class="wn"><span class="star">★</span> ${got}/${max}</span>`}</div>`;
   const g=document.createElement('div');g.className='lvls';
   for(const i of run.list){const s=save.stars[i]||0;tot+=s;const b=document.createElement('button');b.className='lvl'+(unlocked(i)?'':' locked');b.style.background=th.card;
@@ -3799,7 +3800,12 @@ function paseNew(){const r=(a,b)=>a+Math.floor(Math.random()*(b-a+1)),t=r(0,3);l
 function showPase(){S.paused=true;['hud','touch','tricks','raceBoard','lights'].forEach(id=>$(id).classList.remove('on'));paseNew();$('paseErr').textContent='';show('sPase');}
 function paseCheck(){if(paseOk())return false;showPase();return true;}
 function paseLeft(){const m=Math.max(0,Math.ceil(((save.paseHasta||0)-Date.now())/60000));return Math.floor(m/60)+' h '+String(m%60).padStart(2,'0')+' min';}
+// código secreto 2013: lo desbloquea todo (niveles, carreras, motos, tienda) y da monedas de sobra
+function unlockAll(){save.allUnlocked=true;save.owned=BIKES.map(b=>b.id);save.coins=Math.max(save.coins||0,0)+999999;save.rUnl=LEVELS.length-1;
+ const own=new Set(save.gearOwn||[]);for(const k in SHOP)for(const it of SHOP[k].items)if(it.id)own.add(k+':'+it.id);save.gearOwn=[...own];save.aw={own:true,on:save.aw?save.aw.on:false};
+ save.paseHasta=Date.now()+PASE_MS;writeSave();}
 const paseGo=()=>{const v=$('paseA').value.trim().replace(',','.');if(v==='')return;
+ if(v==='2013'){unlockAll();paseLabel();sfx('star',1.6);S.paused=false;goMenu();updateCoins();setTimeout(()=>alert('🔓 ¡CÓDIGO 2013! Todo desbloqueado: niveles, carreras, motos, tienda y 999.999 monedas.'),200);return;}
  if(Number(v)===Number($('paseQ').dataset.r)){save.paseHasta=Date.now()+PASE_MS;writeSave();paseLabel();sfx('star',1.4);S.paused=false;goMenu();}
  else{sfx('crash',.3);$('paseErr').textContent='❌ No es correcto. Prueba con este otro:';paseNew();}};
 $('paseGo').onclick=paseGo;$('paseA').addEventListener('keydown',e=>{e.stopPropagation();if(e.key==='Enter')paseGo();});

@@ -1,15 +1,24 @@
 {
-  "name": "Calculadora",
+  "name": "Calculadora y juego de mates",
   "short_name": "Calculadora",
-  "description": "Calculadora sencilla para sumar, restar, multiplicar, dividir y calcular porcentajes.",
+  "description": "Juego educativo de matemáticas: calculadora y juego de motos con retos de cálculo mental y preguntas de seguridad vial.",
   "lang": "es",
   "start_url": "./",
   "display": "standalone",
   "orientation": "any",
   "background_color": "#000000",
   "theme_color": "#000000",
-  "categories": ["education", "utilities"],
+  "categories": [
+    "education",
+    "games",
+    "kids"
+  ],
   "icons": [
-    { "src": "icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }
+    {
+      "src": "icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
   ]
 }
