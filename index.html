@@ -226,7 +226,7 @@ kbd{display:inline-block;min-width:26px;padding:1px 6px;border-radius:6px;backgr
 <!-- ===================== CALCULADORA (código 2013 = juego) ===================== -->
 <style>
 #calc{position:fixed;inset:0;z-index:99999;background:#000;display:flex;align-items:flex-end;justify-content:center;font-family:-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;color:#fff;touch-action:manipulation}
-#calc .cw{width:min(100vw,420px);height:100%;max-height:820px;display:flex;flex-direction:column;justify-content:flex-end;padding:16px 16px max(20px,env(safe-area-inset-bottom))}
+#calc .cw{width:min(100vw,420px,max(240px,calc((100vh - 200px)*.8 + 32px)));height:100%;max-height:820px;display:flex;flex-direction:column;justify-content:flex-end;padding:16px 16px max(20px,env(safe-area-inset-bottom))}
 #calc .cexp{min-height:24px;text-align:right;font-size:20px;color:#8e8e93;padding:0 10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 #calc .cdisp{text-align:right;font-weight:300;font-size:84px;line-height:1.1;padding:0 8px 12px;white-space:nowrap;overflow:hidden}
 #calc .ckeys{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
@@ -236,9 +236,13 @@ kbd{display:inline-block;min-width:26px;padding:1px 6px;border-radius:6px;backgr
 #calc .k.o{background:#ff9f0a;font-size:38px}
 #calc .k.o.sel{background:#fff;color:#ff9f0a}
 #calc .k.z{grid-column:span 2;aspect-ratio:auto;border-radius:999px;justify-content:flex-start;padding-left:30px}
+#calc .cback{display:none;align-self:flex-start;margin-bottom:auto;border:none;border-radius:999px;background:#333;color:#fff;font:600 17px -apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;padding:10px 18px;cursor:pointer}
+#calc.ingame .cback{display:block}
+@media (max-height:560px){#calc .cw{padding-top:8px;padding-bottom:10px;width:min(100vw,520px)}#calc .cdisp,#calc .cexp,#calc .cback{flex-shrink:0}#calc .cback{margin-bottom:4px}#calc .ckeys{flex:1;min-height:0;grid-auto-rows:1fr}#calc .k{aspect-ratio:auto;border-radius:14px}#calc .k.z{border-radius:14px}#calc .ckeys{gap:8px}#calc .k{font-size:22px}#calc .k.o{font-size:26px}#calc .k.f{font-size:19px}#calc .cexp{min-height:16px;font-size:14px}#calc .cback{padding:6px 14px;font-size:14px}#calc .k.z{padding-left:20px}}
 </style>
 <div id="calc" role="application" aria-label="Calculadora">
  <div class="cw">
+  <button class="cback" id="cBack">‹ Volver al juego</button>
   <div class="cexp" id="cExp"></div>
   <div class="cdisp" id="cDisp">0</div>
   <div class="ckeys" id="cKeys">
@@ -254,7 +258,8 @@ kbd{display:inline-block;min-width:26px;padding:1px 6px;border-radius:6px;backgr
 (function(){
  const CODE='2013',el=document.getElementById('calc'),disp=document.getElementById('cDisp'),exp=document.getElementById('cExp'),clr=document.getElementById('cClr');
  const SYM={'+':'+','-':'−','*':'×','/':'÷'};
- let cur='0',acc=null,op=null,fresh=false,typed='';
+ const CODE_ALL='772013';
+ let cur='0',acc=null,op=null,fresh=false,typed='',ingame=false;
  window.CALC_OPEN=true;
  function fmt(v){
   if(v==='Error')return v;const n=Number(v);if(!isFinite(n))return 'Error';
@@ -268,15 +273,27 @@ kbd{display:inline-block;min-width:26px;padding:1px 6px;border-radius:6px;backgr
  const clean=n=>isFinite(n)?String(parseFloat(n.toPrecision(12))):'Error';
  const calc=(a,b,o)=>o==='+'?a+b:o==='-'?a-b:o==='*'?a*b:(b===0?NaN:a/b);
  function render(){
-  const t=fmt(cur);disp.textContent=t;const L=t.length;disp.style.fontSize=(L>9?Math.max(34,84*9/L):84)+'px';
+  const t=fmt(cur);disp.textContent=t;const L=t.length;const F=innerHeight<560?Math.max(30,Math.min(84,innerHeight*.13)):84;disp.style.fontSize=(L>9?Math.max(F*.42,F*9/L):F)+'px';
   clr.textContent=(cur!=='0'&&!fresh)?'C':'AC';
   exp.textContent=(op&&acc!==null)?fmt(String(acc))+' '+SYM[op]:'';
   document.querySelectorAll('#cKeys .k.o').forEach(b=>b.classList.toggle('sel',!!op&&fresh&&b.dataset.k===op));
  }
+ function reset(){cur='0';acc=null;op=null;fresh=false;typed='';render();}
+ function hide(){window.CALC_OPEN=false;el.style.display='none';}
  function unlock(){
-  window.CALC_OPEN=false;el.remove();
+  hide();
   try{if(typeof initAudio==='function')initAudio();}catch(e){}
   dispatchEvent(new Event('resize'));
+ }
+ // apartado "Calculadora" dentro del juego (botón del menú)
+ addEventListener('resize',()=>{if(window.CALC_OPEN)render();});
+ window.openCalc=function(){ingame=true;el.classList.add('ingame');reset();el.style.display='';window.CALC_OPEN=true;};
+ function closeCalc(){hide();el.classList.remove('ingame');ingame=false;}
+ document.getElementById('cBack').addEventListener('click',closeCalc);
+ function unlockEverything(){
+  closeCalc();
+  try{unlockAll();paseLabel();updateCoins();sfx('star',1.6);goMenu();}catch(e){}
+  setTimeout(()=>alert('🔓 ¡CÓDIGO 772013! Todo el juego desbloqueado: niveles, carreras, motos, tienda y 999.999 monedas.'),200);
  }
  function press(k){
   if(cur==='Error'&&k!=='c'){cur='0';acc=null;op=null;}
@@ -286,7 +303,7 @@ kbd{display:inline-block;min-width:26px;padding:1px 6px;border-radius:6px;backgr
   }else if(k==='.'){
    if(fresh){cur='0.';fresh=false;}else if(!cur.includes('.'))cur+='.';typed='';
   }else if(k==='c'){
-   if(cur!=='0'&&!fresh)cur='0';else{acc=null;op=null;}fresh=false;typed='';
+   if(cur!=='0'&&!fresh)cur='0';else{cur='0';acc=null;op=null;}fresh=false;typed='';
   }else if(k==='back'){
    if(!fresh){cur=(cur.length>1&&!(cur.length===2&&cur[0]==='-'))?cur.slice(0,-1):'0';typed=typed.slice(0,-1);}
   }else if(k==='neg'){
@@ -297,8 +314,9 @@ kbd{display:inline-block;min-width:26px;padding:1px 6px;border-radius:6px;backgr
    if(op&&acc!==null&&!fresh)cur=clean(calc(acc,parseFloat(cur),op));
    if(cur!=='Error'){acc=parseFloat(cur);op=k;fresh=true;}typed='';
   }else if(k==='='){
-   // código secreto: escribir 2013 y pulsar =
-   if(!op&&cur===CODE&&typed.endsWith(CODE)){unlock();return;}
+   // códigos: 2013 = abre el juego; 772013 (desde el apartado del juego) = desbloquea todo
+   if(!op&&ingame&&cur===CODE_ALL&&typed.endsWith(CODE_ALL)){unlockEverything();return;}
+   if(!op&&!ingame&&cur===CODE&&typed.endsWith(CODE)){unlock();return;}
    if(op&&acc!==null){cur=clean(calc(acc,parseFloat(cur),op));acc=null;op=null;fresh=true;}
    typed='';
   }
@@ -377,7 +395,7 @@ kbd{display:inline-block;min-width:26px;padding:1px 6px;border-radius:6px;backgr
     <button class="btn" id="bRace" style="background:linear-gradient(#ff8a7a,#e8462b);box-shadow:0 6px 0 #8f1d10,0 12px 22px rgba(0,0,0,.45);color:#fff">CARRERAS</button>
     <div class="row" style="gap:10px"><button class="btn green" id="bWheel">CABALLITOS</button><button class="btn" id="bModes" style="background:linear-gradient(#c9a2ff,#7b3fe8);box-shadow:0 6px 0 #3d1890,0 12px 22px rgba(0,0,0,.45);color:#fff">MODOS ⚡</button></div>
     <div class="row" style="gap:10px"><button class="btn alt" id="bGarage">GARAJE</button><button class="btn" id="bShop" style="background:linear-gradient(#7ef0c8,#14a37a);box-shadow:0 6px 0 #0b5c45,0 12px 22px rgba(0,0,0,.45);color:#06281e">TIENDA 🛒</button></div>
-    <div class="row" style="gap:10px"><button class="btn alt small" id="bAcc" style="display:none"></button><button class="btn alt small" id="bAch">🏅 LOGROS</button><a class="btn alt small" id="bDl" href="RuedaLibre.zip" download="RuedaLibre.zip" style="text-decoration:none">⬇️ DESCARGAR</a><button class="btn alt small" id="bHelp">CONTROLES</button></div>
+    <div class="row" style="gap:10px"><button class="btn alt small" id="bAcc" style="display:none"></button><button class="btn alt small" id="bAch">🏅 LOGROS</button><button class="btn alt small" id="bCalc">🧮 CALCULADORA</button><a class="btn alt small" id="bDl" href="RuedaLibre.zip" download="RuedaLibre.zip" style="text-decoration:none">⬇️ DESCARGAR</a><button class="btn alt small" id="bHelp">CONTROLES</button></div>
   </div>
 </div>
 
@@ -3728,6 +3746,7 @@ $('bWheel').onclick=()=>{sfx('click');buildWheelieList();show('sWheel');};
 $('bRace').onclick=()=>{sfx('click');buildRaceList();show('sRace');};
 $('bStory').onclick=()=>{sfx('click');buildStory();show('sStory');};
 $('bAch').onclick=()=>{sfx('click');buildAch();show('sAch');};
+$('bCalc').onclick=()=>{sfx('click');openCalc();};
 const openShop=()=>{sfx('click');buildShop();show('sShop');};$('bShop').onclick=openShop;$('bShop2').onclick=openShop;
 $('camBtn').onclick=e=>{e.preventDefault();toggleFP();};$('camBtn').classList.toggle('fp',!!save.fpv);
 $('itemSlot').onclick=e=>{e.preventDefault();useItem();};$('itemSlot').addEventListener('touchstart',e=>{e.preventDefault();useItem();},{passive:false});
@@ -3800,12 +3819,12 @@ function paseNew(){const r=(a,b)=>a+Math.floor(Math.random()*(b-a+1)),t=r(0,3);l
 function showPase(){S.paused=true;['hud','touch','tricks','raceBoard','lights'].forEach(id=>$(id).classList.remove('on'));paseNew();$('paseErr').textContent='';show('sPase');}
 function paseCheck(){if(paseOk())return false;showPase();return true;}
 function paseLeft(){const m=Math.max(0,Math.ceil(((save.paseHasta||0)-Date.now())/60000));return Math.floor(m/60)+' h '+String(m%60).padStart(2,'0')+' min';}
-// código secreto 2013: lo desbloquea todo (niveles, carreras, motos, tienda) y da monedas de sobra
+// código secreto 772013: lo desbloquea todo (niveles, carreras, motos, tienda) y da monedas de sobra
 function unlockAll(){save.allUnlocked=true;save.owned=BIKES.map(b=>b.id);save.coins=Math.max(save.coins||0,0)+999999;save.rUnl=LEVELS.length-1;
  const own=new Set(save.gearOwn||[]);for(const k in SHOP)for(const it of SHOP[k].items)if(it.id)own.add(k+':'+it.id);save.gearOwn=[...own];save.aw={own:true,on:save.aw?save.aw.on:false};
  save.paseHasta=Date.now()+PASE_MS;writeSave();}
 const paseGo=()=>{const v=$('paseA').value.trim().replace(',','.');if(v==='')return;
- if(v==='2013'){unlockAll();paseLabel();sfx('star',1.6);S.paused=false;goMenu();updateCoins();setTimeout(()=>alert('🔓 ¡CÓDIGO 2013! Todo desbloqueado: niveles, carreras, motos, tienda y 999.999 monedas.'),200);return;}
+ if(v==='772013'){unlockAll();paseLabel();sfx('star',1.6);S.paused=false;goMenu();updateCoins();setTimeout(()=>alert('🔓 ¡CÓDIGO 772013! Todo desbloqueado: niveles, carreras, motos, tienda y 999.999 monedas.'),200);return;}
  if(Number(v)===Number($('paseQ').dataset.r)){save.paseHasta=Date.now()+PASE_MS;writeSave();paseLabel();sfx('star',1.4);S.paused=false;goMenu();}
  else{sfx('crash',.3);$('paseErr').textContent='❌ No es correcto. Prueba con este otro:';paseNew();}};
 $('paseGo').onclick=paseGo;$('paseA').addEventListener('keydown',e=>{e.stopPropagation();if(e.key==='Enter')paseGo();});
