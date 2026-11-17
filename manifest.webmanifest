@@ -1,0 +1,15 @@
+{
+  "name": "Calculadora",
+  "short_name": "Calculadora",
+  "description": "Calculadora sencilla para sumar, restar, multiplicar, dividir y calcular porcentajes.",
+  "lang": "es",
+  "start_url": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#000000",
+  "theme_color": "#000000",
+  "categories": ["education", "utilities"],
+  "icons": [
+    { "src": "icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }
+  ]
+}
