@@ -386,6 +386,18 @@ kbd{display:inline-block;min-width:26px;padding:1px 6px;border-radius:6px;backgr
   </div>
 </div>
 
+<!-- Operación al final de cada partida -->
+<div id="mq" style="display:none;position:fixed;inset:0;z-index:60;align-items:center;justify-content:center;padding:16px;background:radial-gradient(ellipse at center,rgba(12,7,20,.7),rgba(12,7,20,.94))">
+  <div class="panel col" style="max-width:420px;width:100%">
+    <h2>🧮 ¡OPERACIÓN!</h2>
+    <div class="hint">Resuélvela para seguir jugando.</div>
+    <div id="mqQ" style="font-family:Bungee;font-size:clamp(36px,8vw,58px);color:#ffe14a;text-shadow:0 4px 0 rgba(0,0,0,.4);margin:8px 0">7 × 8</div>
+    <input id="mqA" class="lgIn" inputmode="numeric" placeholder="Tu respuesta" autocomplete="off" style="text-align:center;font-size:24px">
+    <div id="mqErr" class="hint" style="min-height:18px"></div>
+    <button class="btn green" id="mqGo">COMPROBAR</button>
+  </div>
+</div>
+
 <!-- Menú principal -->
 <div class="screen on" id="sMenu">
   <div class="toggles"><button class="ico" id="bSnd" title="Sonido">🔊</button><button class="ico" id="bMus" title="Música">🎵</button></div>
@@ -3605,7 +3617,23 @@ function drawCockpit(dt){const B=S.bike,W=VW,H=VH,u=Math.min(W,H)/100,col=gearCo
 
 /* =============================== FLUJO ================================ */
 const $=id=>document.getElementById(id);
-function show(id){document.querySelectorAll('.screen').forEach(s=>s.classList.toggle('on',s.id===id));}
+function show(id){document.querySelectorAll('.screen').forEach(s=>s.classList.toggle('on',s.id===id));if(MQ_END&&MQ_END.includes(id))mqOpen();}
+// ---- operación al final de cada partida: hay que resolverla para seguir (con 1 también pasa) ----
+var MQ_END=['sResult','sRaceRes','sWRes','sModeRes','sStoryRes'];
+var MQ_ON=false;
+function mqNew(){const r=(a,b)=>a+Math.floor(Math.random()*(b-a+1)),t=r(0,3);let a,b,q,res;
+ if(t===0){a=r(12,89);b=r(11,79);q=a+' + '+b;res=a+b;}else if(t===1){a=r(30,99);b=r(11,a-5);q=a+' − '+b;res=a-b;}
+ else if(t===2){a=r(3,12);b=r(3,12);q=a+' × '+b;res=a*b;}else{b=r(2,9);res=r(3,12);a=b*res;q=a+' ÷ '+b;}
+ $('mqQ').textContent=q;$('mqQ').dataset.r=res;$('mqA').value='';setTimeout(()=>$('mqA').focus(),50);}
+function mqOpen(){if(MQ_ON)return;MQ_ON=true;for(const k in keys)keys[k]=false;mqNew();$('mqErr').textContent='';$('mq').style.display='flex';}
+function mqClose(){MQ_ON=false;$('mq').style.display='none';}
+function mqGo(){const v=$('mqA').value.trim().replace(',','.');if(v==='')return;
+ if(v==='1'||Number(v)===Number($('mqQ').dataset.r)){sfx('star',1.4);mqClose();return;}
+ sfx('crash',.3);$('mqErr').textContent='❌ No es correcto. Prueba con esta otra:';mqNew();}
+// mientras está la operación, el juego no recibe teclas (Enter comprueba)
+addEventListener('keydown',e=>{if(!MQ_ON)return;e.stopImmediatePropagation();if(e.key==='Enter'){e.preventDefault();mqGo();}},true);
+addEventListener('keyup',e=>{if(MQ_ON)e.stopImmediatePropagation();},true);
+document.getElementById('mqGo').onclick=mqGo;
 function hideAll(){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('on'));}
 function startLevel(i,mode){
  if(mode==='play'&&!S.raceStarting&&!paseOk()){showPase();return;}
