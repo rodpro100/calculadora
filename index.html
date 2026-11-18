@@ -337,6 +337,10 @@ kbd{display:inline-block;min-width:26px;padding:1px 6px;border-radius:6px;backgr
  // mientras está la calculadora, el juego no recibe teclas ni arranca el audio
  ['keyup','keypress','pointerdown'].forEach(t=>addEventListener(t,e=>{if(window.CALC_OPEN&&t!=='pointerdown')e.stopImmediatePropagation();},true));
  render();
+ // al refrescar la página (F5 / recargar) se entra directamente al juego
+ let reloaded=false;
+ try{const nv=performance.getEntriesByType('navigation')[0];reloaded=nv?nv.type==='reload':(performance.navigation&&performance.navigation.type===1);}catch(e){}
+ if(reloaded)unlock();
 })();
 </script>
 <canvas id="c"></canvas>
