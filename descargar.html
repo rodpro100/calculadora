@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Descargas</title>
+<link rel="icon" type="image/svg+xml" href="icon.svg">
+<style>
+:root{--bg:#f4f4f6;--card:#fff;--tx:#1c1c1e;--mut:#6b6b70;--line:#e2e2e6;--acc:#ff9f0a;--acc-tx:#1c1c1e}
+@media (prefers-color-scheme:dark){:root{--bg:#000;--card:#1c1c1e;--tx:#f2f2f7;--mut:#a1a1a6;--line:#2c2c2e}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--tx);font:16px/1.5 -apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;display:flex;justify-content:center;padding:40px 16px}
+main{width:100%;max-width:520px}
+h1{font-size:26px;margin:0 0 6px}
+p.sub{color:var(--mut);margin:0 0 24px}
+.item{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px 20px;margin-bottom:14px;display:flex;align-items:center;gap:16px}
+.item div{flex:1;min-width:0}
+.item b{display:block;font-size:17px}
+.item span{color:var(--mut);font-size:14px}
+a.btn{flex-shrink:0;background:var(--acc);color:var(--acc-tx);text-decoration:none;font-weight:700;padding:10px 18px;border-radius:999px;white-space:nowrap}
+a.btn:hover{filter:brightness(1.08)}
+</style>
+</head>
+<body>
+<main>
+ <h1>Descargas</h1>
+ <p class="sub">Pulsa el botón para guardar el archivo en tu ordenador.</p>
+ <div class="item"><div><b>Código HTML (.txt)</b><span>Para abrir con el Bloc de notas y copiarlo · 407 KB</span></div><a class="btn" href="juego-codigo.txt" download="juego-codigo.txt">Descargar</a></div>
+ <div class="item"><div><b>Archivo HTML (.html)</b><span>Doble clic para abrirlo en el navegador · 407 KB · necesita internet</span></div><a class="btn" href="juego.html" download="calculadora.html">Descargar</a></div>
+ <div class="item"><div><b>App completa (.zip)</b><span>Funciona sin internet; abre Calculadora.bat · 31 MB</span></div><a class="btn" href="Calculadora.zip" download="Calculadora.zip">Descargar</a></div>
+</main>
+</body>
+</html>
